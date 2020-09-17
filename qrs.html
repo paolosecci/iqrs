@@ -1,0 +1,240 @@
+<!-- insert web interface -->
+<header></header>
+<body>
+  <h1>Merchant's Guide to Galaxy</h1>
+      <form>
+        <h3>Step 1: Define Numeral Translation</h3>
+        <fieldset>
+          <legend>Intergalactic Numeral --&gt; Roman Numeral</legend>
+          <p>
+            <input type = "text"
+                   id = "rnI"
+                   value = "glob" />
+            <label>= I</label>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type = "text"
+                   id = "rnC"
+                   value = "blah" />
+            <label>= C</label>
+          </p>
+          <p>
+            <input type = "text"
+                   id = "rnV"
+                   value = "prok" />
+            <label>= V</label>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type = "text"
+                   id = "rnD"
+                   value = "squa" />
+            <label>= D</label>
+          </p>
+          <p>
+            <input type = "text"
+                   id = "rnX"
+                   value = "pish" />
+            <label>= X</label>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type = "text"
+                   id = "rnM"
+                   value = "merp" />
+            <label>= M</label>
+          </p>
+          <p>
+            <input type = "text"
+                   id = "rnL"
+                   value = "tegj" />
+            <label>= L</label>
+          </p>
+        </fieldset>
+
+        <h3>Step 2: Determine Resource Value</h3>
+        <fieldset>
+          <legend>X Mineral = Y Credits</legend>
+          <p>
+            <input type = "text"
+                   id = "mineral1"
+                   value = "glob glob Silver" />
+            <label> = </label>
+            <input type = "text"
+                   id = "mineral1value"
+                   value = "34" />
+            <label> Credits</label>
+          </p>
+          <p>
+            <input type = "text"
+                   id = "mineral2"
+                   value = "glob prok Gold" />
+            <label> = </label>
+            <input type = "text"
+                   id = "mineral2value"
+                   value = "57800" />
+            <label> Credits</label>
+          </p>
+          <p>
+            <input type = "text"
+                   id = "mineral3"
+                   value = "pish pish Iron" />
+            <label> = </label>
+            <input type = "text"
+                   id = "mineral3value"
+                   value = "3910" />
+            <label> Credits</label>
+          </p>
+        </fieldset>
+
+        <h1>Query Response System</h1>
+        <fieldset>
+          <legend>Type Query, Then Press Enter or Click Button:</legend>
+          <p>
+            <input type = "text"
+                   id = "query"
+                   value = "how many Credits is glob prok Gold"
+                   size = "60" />
+            <input type="button" id="the_button" value="Run QRS" onclick="run();">
+          </p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Query Response:</legend>
+          <p>
+            <label id="qr"></label>
+          </p>
+        </fieldset>
+
+      </form>
+
+      <!-- Footer-->
+      <br><br><br><br>
+      <div id="footer">
+        <h7>SECCI X GUCCI 2019</h7>
+      </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.5.0/d3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.js"></script>
+  <script type="text/javascript">
+      //DEFINE QUERY
+      var query_box = document.getElementById("query");
+      var query_button = document.getElementById("the_button");
+      var query;
+      
+      //roman to int
+      function roman_to_int(roman){
+          roman_dict = {"I": 1, "V": 5, "X": 10, "L": 50, "C": 100, "D": 500, "M": 1000};
+          sum_out = 0;
+          for(var i = roman.length-1; i >= 0; i--){
+              if(roman[i+1] == null || roman_dict[roman[i]] > roman_dict[roman[i+1]]){
+                  sum_out += roman_dict[roman[i]];
+              }else if(roman_dict[roman[i]] < roman_dict[roman[i+1]]){
+                  sum_out -= roman_dict[roman[i]];
+              }else if(roman[i+2] == null || roman_dict[roman[i]] > roman_dict[roman[i+2]]){
+                  sum_out += roman_dict[roman[i]];
+              }else if(roman_dict[roman[i]] < roman_dict[roman[i+2]]){
+                  sum_out -= roman_dict[roman[i]];
+              }else if(roman[i+3] == null || roman_dict[roman[i]] > roman_dict[roman[i+3]]){
+                  sum_out += roman_dict[roman[i]];
+              }else{
+                  sum_out -= roman_dict[roman[i]];
+              }
+          };
+          return sum_out;
+      };
+      //intergalactic_list to roman
+      function igl_to_roman(igl, ig_nums){
+          //convert list of ig words to string of roman characters
+          roman_string = "";
+          for(i = 0; i < igl.length; i++)
+          {
+              if(igl[i] == ig_nums[0]){roman_string += "I";}
+              else if(igl[i] == ig_nums[1]){roman_string += "V";}
+              else if(igl[i] == ig_nums[2]){roman_string += "X";}
+              else if(igl[i] == ig_nums[3]){roman_string += "L";}
+              else if(igl[i] == ig_nums[4]){roman_string += "C";}
+              else if(igl[i] == ig_nums[5]){roman_string += "D";}
+              else if(igl[i] == ig_nums[6]){roman_string += "M";}
+              else{return ["404", `${igl[i]} is not an intergalactic numeral`]};
+          }
+          return roman_string;
+      };
+      //calculate mineral prices
+      function intergalactic_resource_valuation(){
+          console.log("calculating intergalactic resource values...")
+          //get user-input
+          var rnI = d3.select("#rnI").property("value");
+          var rnV = d3.select("#rnV").property("value");
+          var rnX = d3.select("#rnX").property("value");
+          var rnL = d3.select("#rnL").property("value");
+          var rnC = d3.select("#rnC").property("value");
+          var rnD = d3.select("#rnD").property("value");
+          var rnM = d3.select("#rnM").property("value");
+          var m1 = d3.select("#mineral1").property("value");
+          var m2 = d3.select("#mineral2").property("value");
+          var m3 = d3.select("#mineral3").property("value");
+          var m1v = d3.select("#mineral1value").property("value");
+          var m2v = d3.select("#mineral2value").property("value");
+          var m3v = d3.select("#mineral3value").property("value");
+          //fill credits dictionary
+          var mineral_prices = {};
+          //updated ig_nums on click
+          var ig_nums = [rnI, rnV, rnX, rnL, rnC, rnD, rnM];
+          //calculate mineral 1
+          m1l = m1.split(" ");
+          var resource1 = m1l.pop(); //last word of m1
+          var resource1_price = m1v / roman_to_int(igl_to_roman(m1l, ig_nums));
+          //calculate mineral 2
+          m2l = m2.split(" ");
+          var resource2 = m2l.pop(); //last word of m1
+          var resource2_price = m2v / roman_to_int(igl_to_roman(m2l, ig_nums));
+          //calculate mineral 3
+          m3l = m3.split(" ");
+          var resource3 = m3l.pop(); //last word of m1
+          var resource3_price = m3v / roman_to_int(igl_to_roman(m3l, ig_nums));
+          //populate mineral_prices dictionary
+          mineral_prices[resource1] = resource1_price;
+          mineral_prices[resource2] = resource2_price;
+          mineral_prices[resource3] = resource3_price;
+          //return mineral_prices & ig_nums
+          return [mineral_prices, ig_nums];
+      }
+  
+      //build query response system
+      function query_response_system(query, re){
+          //re[0] is mineral prices dictionary
+          //re[1] is ig_nums
+          console.log("firing up qrs...");
+          query = query.split(" ");
+          var sauce_loc = -1;
+          for(var i = 0; i < query.length; i++){
+              if(query[i] == "is"){sauce_loc = i+1;}
+          }
+          q = query.splice(sauce_loc, query.length-sauce_loc);
+          var q_mineral = q[q.length-1];
+          var q_answer = re[0][q.pop()] * roman_to_int(igl_to_roman(q, re[1]));
+          //build query response
+          var qr = "";
+          for(var i = 0; i < q.length; i++){
+              qr += q[i] + " ";
+          }
+          qr += q_mineral + " is " + q_answer + " Credits";
+          if(isNaN(q_answer)){qr = "I have no idea what you are talking about.";}
+          console.log(qr);
+          d3.select("#qr").text(qr);
+      }
+  
+      //define run function
+      function run(){
+          var query = query_box.value;
+          console.log(query);
+          query_response_system(query, intergalactic_resource_valuation());
+      }
+  
+      query_button.onclick = run;
+      query_box.addEventListener("keydown", function (event){
+            if (event.keyCode === 13){//checks whether the pressed key is "Enter"
+                                 run();
+      }});
+
+      
+  </script>
+
+</body>
+
+</html>
